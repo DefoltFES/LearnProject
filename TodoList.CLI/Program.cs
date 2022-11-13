@@ -6,15 +6,13 @@ class Program
 {
     public static List<UserTask> logs = new List<UserTask>();
 
-    public static TodoRepository repository { get; set; }
-
     public static DateTimeOffset now = DateTimeOffset.Now;
 
     public static void Main()
     {
         Console.OutputEncoding = Encoding.UTF8;
         Console.InputEncoding = Encoding.Unicode;
-        repository = new TodoRepository(AuthUser());
+        TodoRepository.Enter(AuthUser());
         int? inputUser = null;
         do
         {
@@ -69,7 +67,7 @@ class Program
         var taskText = Console.ReadLine();
         if (!string.IsNullOrWhiteSpace(taskText))
         {
-            repository.Add(new UserTask(taskText));
+            TodoRepository.Add(new UserTask(taskText));
         }
         else
         {
@@ -93,8 +91,8 @@ class Program
                 {
                     Console.WriteLine($"Исходный текст задачи {task.Note}\nВведите текст изменненый");
                     var text = Console.ReadLine();
-                    task.Note = text;
-                    repository.Edit(task);
+                    
+                    TodoRepository.Edit(task.Id,text);
                 }
                 if (choiceEdit == 2)
                 {
@@ -103,7 +101,7 @@ class Program
                     {
                         if (status == 0 || status == 1)
                         {
-                            task.IsClose = Convert.ToBoolean(status);
+                            TodoRepository.Edit(task.Id,Convert.ToBoolean(status));
                         }
                     }
                     else
@@ -128,7 +126,7 @@ class Program
         var userInput = Console.ReadLine();
         if (!string.IsNullOrWhiteSpace(userInput) && Int32.TryParse(userInput, out int choice))
         {
-            repository.Delete(logs[choice - 1]);
+            TodoRepository.Delete(logs[choice - 1].Id);
         }
         ShowTask();
     }
@@ -136,7 +134,7 @@ class Program
 
     public static void ShowTask()
     {
-        logs = new List<UserTask>(repository.Get());
+        logs = new List<UserTask>(TodoRepository.Get());
         if (logs.Count == 0)
         {
             Console.WriteLine("Нет задач");

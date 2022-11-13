@@ -19,12 +19,25 @@ public class TaskController : ControllerBase
         _logger = logger;
     }
 
-    [HttpGet]
-    [ProducesResponseType(typeof(GetTasksResponse),(int)HttpStatusCode.OK)]
-    public async Task<IActionResult>  Get(string nickname)
+    [HttpGet("EnterNickname")]
+    [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
+    public async Task<IActionResult> EnterNickname([FromBody] EnterNicknameRequest request)
     {
-         var userTask= TodoApiRepository.Get(nickname);
-         var response = new GetTasksResponse
+        var response = TodoRepository.Enter(request.UserName);
+        return Ok(response);
+    }
+
+    [HttpGet("GetTasks")]
+    [ProducesResponseType(typeof(GetTasksResponse), (int)HttpStatusCode.OK)]
+    public async Task<IActionResult> Get()
+    {
+        if (TodoRepository.UserName == null)
+        {
+            return NotFound("Username is empty");
+        }
+
+        var userTask = TodoRepository.Get();
+        var response = new GetTasksResponse
         {
             Tasks = userTask.Select(x => new GetTaskResponse
             {
@@ -39,36 +52,56 @@ public class TaskController : ControllerBase
 
 
 
-    [HttpPost]
+    [HttpPost("CreateTask")]
     [ProducesResponseType(typeof(Guid), (int)HttpStatusCode.OK)]
     public async Task<IActionResult> Create([FromBody] CreateTaskRequest request)
     {
-        var todoItem = new UserTask(request.Note){Id = Guid.NewGuid()};
-        var todoItemId = TodoApiRepository.Add(todoItem,request.Username);
+        if (TodoRepository.UserName == null)
+        {
+            return NotFound("Username is empty");
+        }
+
+        var todoItem = new UserTask(request.Note) { Id = Guid.NewGuid() };
+        var todoItemId = TodoRepository.Add(todoItem);
         return Ok(todoItemId);
     }
 
-    [HttpPut]
+    [HttpPut("ChangeTextTask")]
     [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
     public async Task<IActionResult> Update([FromBody] UpdateTaskRequest request)
     {
-        var status = TodoApiRepository.Edit(request.Id, request.Username,request.Text);
+        if (TodoRepository.UserName == null)
+        {
+            return NotFound("Username is empty");
+        }
+
+        var status = TodoRepository.Edit(request.Id, request.Text);
         return Ok(status);
     }
 
-    [HttpPut]
+    [HttpPut("CloseTask")]
     [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
     public async Task<IActionResult> Close([FromBody] CloseTaskRequest request)
     {
-        var status = TodoApiRepository.Edit(request.Id,request.Username,true);
+        if (TodoRepository.UserName == null)
+        {
+            return NotFound("Username is empty");
+        }
+
+        var status = TodoRepository.Edit(request.Id, true);
         return Ok(status);
     }
 
-    [HttpDelete]
+    [HttpDelete("DeleteTask")]
     [ProducesResponseType(typeof(bool), (int)HttpStatusCode.OK)]
     public async Task<IActionResult> Delete([FromBody] DeleteTaskRequest request)
     {
-        var status = TodoApiRepository.Delete(request.Id,request.Nickname);
+        if (TodoRepository.UserName == null)
+        {
+            return NotFound("Username is empty");
+        }
+
+        var status = TodoRepository.Delete(request.Id);
         return Ok(status);
     }
 
