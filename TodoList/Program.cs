@@ -103,7 +103,7 @@ class Program
                     {
                         if (status == 0 || status == 1)
                         {
-                            task.IsOpen = Convert.ToBoolean(status);
+                            task.IsClose = Convert.ToBoolean(status);
                         }
                     }
                     else
@@ -145,7 +145,7 @@ class Program
         int i = 1;
         foreach (var item in logs)
         {
-            var status = item.IsOpen == true ? "Выполнена" : "Не выполнена";
+            var status = item.IsClose == true ? "Выполнена" : "Не выполнена";
             Console.WriteLine($"Номер:{i} Текст:{item.Note} Статус:{status} Дата создания:{item.CreationDate:dd.MM.yyyy}");
             i++;
         }

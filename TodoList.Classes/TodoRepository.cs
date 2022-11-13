@@ -56,7 +56,7 @@ namespace TodoList.Classes{
            var fullpath = $"{UserPathDirectory}/{task.Id}.json";
            var item = File.ReadAllText(fullpath);
            var jsonObj = JsonSerializer.Deserialize<UserTask>(item);
-           jsonObj.IsOpen=task.IsOpen;
+           jsonObj.IsClose=task.IsClose;
            jsonObj.Note=task.Note;
            var output = JsonSerializer.Serialize(jsonObj,new JsonSerializerOptions{WriteIndented=true});
            File.WriteAllText(fullpath,output);
